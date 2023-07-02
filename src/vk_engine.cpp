@@ -40,6 +40,9 @@ void VulkanEngine::init()
 
 	//Load the core vulkan structures
 	init_vulkan();
+
+	//create the swapchain
+	init_swapchain();
 	
 	//everything went fine
 	_isInitialized = true;
@@ -87,6 +90,23 @@ void VulkanEngine::init_vulkan()
 	// Get the VkDevice handle used in the rest of a Vulkan application
 	_device = vkbDevice.device;
 	_chosenGPU = physicalDevice.physical_device;
+}
+
+void VulkanEngine::init_swapchain()
+{
+	vkb::SwapchainBuilder swapchainBuilder{ _chosenGPU, _device, _surface };
+	
+	vkb::Swapchain vkbSwapchain = swapchainBuilder
+		.use_default_format_selection() //use vsync present mode
+		.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+		.set_desired_extent(_windowExtent.width, _windowExtent.height)
+		.build()
+		.value();
+	
+	_swapchain = vkbSwapchain.swapchain;
+	_swapchainImages = vkbSwapchain.get_images().value();
+	_swapchainImageViews = vkbSwapchain.get_image_views().value();
+	_swapchainImageFormat = vkbSwapchain.image_format;
 }
 
 void VulkanEngine::cleanup()
