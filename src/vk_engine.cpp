@@ -109,10 +109,23 @@ void VulkanEngine::init_swapchain()
 	_swapchainImageFormat = vkbSwapchain.image_format;
 }
 
+//Objects must be destroyed in the opposite order they are created
 void VulkanEngine::cleanup()
 {	
 	if (_isInitialized) {
-		
+
+		vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+
+		//destroy swapchain resources
+		for (int i = 0; i < _swapchainImageViews.size(); i++) {
+
+			vkDestroyImageView(_device, _swapchainImageViews[i], nullptr);
+		}
+
+		vkDestroyDevice(_device, nullptr);
+		vkDestroySurfaceKHR(_instance, _surface, nullptr);
+		vkb::destroy_debug_utils_messenger(_instance, _debug_messenger);
+		vkDestroyInstance(_instance, nullptr);
 		SDL_DestroyWindow(_window);
 	}
 }
